@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+</head>
+<body>
+    <h2>회원가입</h2>
+    <form method="post">
+        {% csrf_token %} <!-- 폼 보안 관련으로 CSRF 토큰 추가 *프론트와 벡 연동을 위해 반드시 추가* -->
+        {{ form.as_p }}
+        <button type="submit">가입</button>
+    </form>
+</body>
+</html>
