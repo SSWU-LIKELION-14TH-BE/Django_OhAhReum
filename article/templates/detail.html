@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ article.title }}</title>
+</head>
+<body>
+    <h1>{{ article.title }}</h1>
+
+    <p>작성자: {{ article.author }}</p>
+    <p>{{ article.content }}</p>
+
+    <h3>기술 스택</h3>
+    <ul>
+    {% for tech in article.tech_stacks.all %}
+        <li>{{ tech.name }}</li>
+    {% endfor %}
+    </ul>
+
+    {% if article.github_url %}
+    <p><a href="{{ article.github_url }}">GitHub</a></p>
+    {% endif %}
+
+    {% for img in article.images.all %}
+    <img src="{{ img.image.url }}" width="300"><br>
+    {% endfor %}
+
+    <a href="{% url 'article_list' %}">목록</a>
+</body>
+</html>

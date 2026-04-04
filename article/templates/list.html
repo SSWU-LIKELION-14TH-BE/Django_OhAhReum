@@ -1,0 +1,14 @@
+<h1>게시글 목록</h1>
+
+<a href="{% url 'article_create' %}">글쓰기</a>
+
+<ul>
+  {% for article in articles %}
+    <li>
+      <a href="{% url 'article_detail' article.pk %}">
+        {{ article.title }}
+      </a>
+      - {{ article.author }}
+    </li>
+  {% endfor %}
+</ul>
