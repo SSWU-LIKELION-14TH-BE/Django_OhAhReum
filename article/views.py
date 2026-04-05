@@ -38,3 +38,13 @@ def article_create(request):
         form = ArticleForm()
 
     return render(request, 'create.html', {'form': form})
+
+def article_like(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+
+    if request.user in article.like_users.all():
+        article.like_users.remove(request.user)  # 좋아요 취소
+    else:
+        article.like_users.add(request.user)     # 좋아요 추가
+
+    return redirect('article_detail', pk=pk)
