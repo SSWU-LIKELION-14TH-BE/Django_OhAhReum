@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('user.urls')), #users 앱의 url 연결
     path('article/', include('article.urls')), #article 앱의 url 연결
+    path('comment/', include('comment.urls')), #comment 앱의 url 연결
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
