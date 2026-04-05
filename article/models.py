@@ -11,6 +11,8 @@ class Article(models.Model):
     github_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_articles', blank=True)
+
     def __str__(self):
         return self.title
     

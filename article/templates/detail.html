@@ -5,11 +5,35 @@
     <title>{{ article.title }}</title>
 </head>
 <body>
-
+    <a href="{% url 'home' %}">홈으로</a>
     <h1>{{ article.title }}</h1>
+    <p>{{ article.author.nickname }}</p>
+    <hr>
+    <p>{{ article.content|linebreaksbr }}</p>
 
-    <p>작성자: {{ article.author.nickname }}</p>
-    <p>{{ article.content }}</p>
+    <!-- 이미지 -->
+    {% if article.images.all %}
+        {% for img in article.images.all %}
+            <img src="{{ img.image.url }}" width="300"><br>
+        {% endfor %}
+    {% else %}
+        <p>이미지가 없습니다.</p>
+    {% endif %}
+
+    <form method="POST" action="{% url 'article_like' article.pk %}">
+        {% csrf_token %}
+    
+        {% if user in article.like_users.all %}
+            <button type="submit" style="color:red;">
+                ❤️ {{ article.like_users.count }}
+            </button>
+        {% else %}
+            <button type="submit" style="color:gray;">
+                🤍 {{ article.like_users.count }}
+            </button>
+        {% endif %}
+    
+    </form>
 
     <h3>기술 스택</h3>
     <ul>
@@ -20,15 +44,6 @@
 
     {% if article.github_url %}
     <p><a href="{{ article.github_url }}">GitHub</a></p>
-    {% endif %}
-
-    <!-- 이미지 -->
-    {% if article.images.all %}
-        {% for img in article.images.all %}
-            <img src="{{ img.image.url }}" width="300"><br>
-        {% endfor %}
-    {% else %}
-        <p>이미지가 없습니다.</p>
     {% endif %}
 
     <hr>
@@ -51,7 +66,21 @@
                 <strong>{{ comment.author.nickname }}</strong>
                 <small>{{ comment.created_at }}</small>
 
-                <p>{{ comment.content }}</p>
+                <p>{{ comment.content|linebreaksbr }}</p>
+
+                <form method="POST" action="{% url 'comment_like' comment.pk %}">
+                    {% csrf_token %}
+
+                    {% if user in comment.like_users.all %}
+                        <button type="submit" style="color:red;">
+                            ❤️ {{ comment.like_users.count }}
+                        </button>
+                    {% else %}
+                        <button type="submit" style="color:gray;">
+                            🤍 {{ comment.like_users.count }}
+                        </button>
+                    {% endif %}
+                </form>
 
                 <!-- 대댓글 목록 -->
                 <div style="margin-left:20px;">
@@ -59,7 +88,20 @@
                         <div style="border:1px solid #eee; margin:5px; padding:5px;">
                             <strong>{{ reply.author.nickname }}</strong>
                             <small>{{ reply.created_at }}</small>
-                            <p>{{ reply.content }}</p>
+                            <p>{{ reply.content|linebreaksbr }}</p>
+                            <form method="POST" action="{% url 'comment_like' reply.pk %}">
+                                {% csrf_token %}
+
+                                {% if user in reply.like_users.all %}
+                                    <button type="submit" style="color:red;">
+                                        ❤️ {{ reply.like_users.count }}
+                                    </button>
+                                {% else %}
+                                    <button type="submit" style="color:gray;">
+                                        🤍 {{ reply.like_users.count }}
+                                    </button>
+                                {% endif %}
+                            </form>
                         </div>
                     {% endfor %}
                 </div>

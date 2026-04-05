@@ -19,5 +19,7 @@ class Comment(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_comments', blank=True)
+
     def __str__(self):
         return self.content[:20]

@@ -24,3 +24,13 @@ def comment_create(request, article_pk):
             comment.save()
 
     return redirect('article_detail', pk=article_pk)
+
+def comment_like(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+
+    if request.user in comment.like_users.all():
+        comment.like_users.remove(request.user)
+    else:
+        comment.like_users.add(request.user)
+
+    return redirect('article_detail', pk=comment.article.pk)
