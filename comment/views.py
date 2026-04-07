@@ -25,6 +25,7 @@ def comment_create(request, article_pk):
 
     return redirect('article_detail', pk=article_pk)
 
+@login_required
 def comment_like(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
 
@@ -32,5 +33,30 @@ def comment_like(request, pk):
         comment.like_users.remove(request.user)
     else:
         comment.like_users.add(request.user)
+
+    return redirect('article_detail', pk=comment.article.pk)
+
+@login_required
+def comment_update(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+
+    if request.user != comment.author:
+        return redirect('article_detail', pk=comment.article.pk)
+
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        comment.content = content
+        comment.save()
+
+    return redirect('article_detail', pk=comment.article.pk)
+
+@login_required
+def comment_delete(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+
+    if request.user == comment.author:
+        article_pk = comment.article.pk
+        comment.delete()
+        return redirect('article_detail', pk=article_pk)
 
     return redirect('article_detail', pk=comment.article.pk)

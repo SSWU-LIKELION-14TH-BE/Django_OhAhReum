@@ -39,6 +39,7 @@ def article_create(request):
 
     return render(request, 'create.html', {'form': form})
 
+@login_required
 def article_like(request, pk):
     article = get_object_or_404(Article, pk=pk)
 
@@ -48,3 +49,29 @@ def article_like(request, pk):
         article.like_users.add(request.user)     # 좋아요 추가
 
     return redirect('article_detail', pk=pk)
+
+@login_required
+def article_update(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+
+    if request.user != article.author:
+        return redirect('article_detail', pk=pk)
+
+    if request.method == 'POST':
+        form = ArticleForm(request.POST, request.FILES, instance=article)
+        if form.is_valid():
+            form.save()
+            return redirect('article_detail', pk=pk)
+    else:
+        form = ArticleForm(instance=article)
+
+    return render(request, 'create.html', {'form': form})
+
+@login_required
+def article_delete(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+
+    if request.user == article.author:
+        article.delete()
+
+    return redirect('article_list')
