@@ -7,6 +7,14 @@
 <body>
     <a href="{% url 'home' %}">홈으로</a>
     <h1>{{ article.title }}</h1>
+    {% if user == article.author %}
+        <a href="{% url 'article_update' article.pk %}">수정</a>
+
+        <form method="POST" action="{% url 'article_delete' article.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">삭제</button>
+        </form>
+    {% endif %}
     <p>{{ article.author.nickname }}</p>
     <hr>
     <p>{{ article.content|linebreaksbr }}</p>
@@ -17,7 +25,7 @@
             <img src="{{ img.image.url }}" width="300"><br>
         {% endfor %}
     {% else %}
-        <p>이미지가 없습니다.</p>
+        <p> no images </p>
     {% endif %}
 
     <form method="POST" action="{% url 'article_like' article.pk %}">
@@ -67,7 +75,18 @@
                 <small>{{ comment.created_at }}</small>
 
                 <p>{{ comment.content|linebreaksbr }}</p>
+                {% if user == comment.author %}
+                    <form method="POST" action="{% url 'comment_update' comment.pk %}">
+                        {% csrf_token %}
+                        <textarea name="content">{{ comment.content|linebreaksbr }}</textarea>
+                        <button type="submit">수정</button>
+                    </form>
 
+                    <form method="POST" action="{% url 'comment_delete' comment.pk %}">
+                        {% csrf_token %}
+                        <button type="submit">삭제</button>
+                    </form>
+                {% endif %}
                 <form method="POST" action="{% url 'comment_like' comment.pk %}">
                     {% csrf_token %}
 
@@ -89,6 +108,18 @@
                             <strong>{{ reply.author.nickname }}</strong>
                             <small>{{ reply.created_at }}</small>
                             <p>{{ reply.content|linebreaksbr }}</p>
+                            {% if user == reply.author %}
+                                <form method="POST" action="{% url 'comment_update' reply.pk %}">
+                                    {% csrf_token %}
+                                    <textarea name="content">{{ reply.content|linebreaksbr }}</textarea>
+                                    <button type="submit">수정</button>
+                                </form>
+
+                                <form method="POST" action="{% url 'comment_delete' reply.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit">삭제</button>
+                                </form>
+                            {% endif %}
                             <form method="POST" action="{% url 'comment_like' reply.pk %}">
                                 {% csrf_token %}
 
