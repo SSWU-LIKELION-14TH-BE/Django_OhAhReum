@@ -6,15 +6,38 @@
 </head>
 <body>
   <a href="{% url 'home' %}">홈으로</a>
-    <h1>게시글 작성</h1>
+
+  <h1>
+    {% if article %}게시글 수정{% else %}게시글 작성{% endif %}
+  </h1>
 
 <form method="POST" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
-  <p>이미지 업로드:</p>
-    <input type="file" name="images" multiple>
 
-  <button type="submit">작성</button>
+  <!-- 수정일 때만 기존 이미지 표시 -->
+  {% if article %}
+    <h3>기존 이미지</h3>
+    {% for img in article.images.all %}
+      <div>
+        <img src="{{ img.image.url }}" width="150">
+
+        <!-- 삭제 체크 -->
+        <label>
+          <input type="checkbox" name="delete_images" value="{{ img.id }}">
+          삭제
+        </label>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <p>이미지 추가 업로드:</p>
+  <input type="file" name="images" multiple>
+
+  <button type="submit">
+    {% if article %}수정{% else %}작성{% endif %}
+  </button>
 </form>
+
 </body>
 </html>
