@@ -5,16 +5,19 @@
     <title>{{ article.title }}</title>
 </head>
 <body>
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color:red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
     <a href="{% url 'home' %}">홈으로</a>
     <h1>{{ article.title }}</h1>
-    {% if user == article.author %}
-        <a href="{% url 'article_update' article.pk %}">수정</a>
+    <a href="{% url 'article_update' article.pk %}">수정</a>
 
-        <form method="POST" action="{% url 'article_delete' article.pk %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit">삭제</button>
-        </form>
-    {% endif %}
+    <form method="POST" action="{% url 'article_delete' article.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">삭제</button>
+    </form>
     <p>{{ article.author.nickname }}</p>
     <hr>
     <p>{{ article.content|linebreaksbr }}</p>
@@ -75,16 +78,18 @@
                 <small>{{ comment.created_at }}</small>
 
                 <p>{{ comment.content|linebreaksbr }}</p>
-                {% if user == comment.author %}
+                {% if request.user == comment.author %}
+                    <!-- 수정 -->
                     <form method="POST" action="{% url 'comment_update' comment.pk %}">
                         {% csrf_token %}
-                        <textarea name="content">{{ comment.content|linebreaksbr }}</textarea>
+                        <textarea name="content">{{ comment.content }}</textarea>
                         <button type="submit">수정</button>
                     </form>
 
+                    <!-- 삭제 -->
                     <form method="POST" action="{% url 'comment_delete' comment.pk %}">
                         {% csrf_token %}
-                        <button type="submit">삭제</button>
+                        <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
                     </form>
                 {% endif %}
                 <form method="POST" action="{% url 'comment_like' comment.pk %}">
@@ -108,16 +113,18 @@
                             <strong>{{ reply.author.nickname }}</strong>
                             <small>{{ reply.created_at }}</small>
                             <p>{{ reply.content|linebreaksbr }}</p>
-                            {% if user == reply.author %}
+                            {% if request.user == reply.author %}
+                                <!-- 수정 -->
                                 <form method="POST" action="{% url 'comment_update' reply.pk %}">
                                     {% csrf_token %}
-                                    <textarea name="content">{{ reply.content|linebreaksbr }}</textarea>
+                                    <textarea name="content">{{ reply.content }}</textarea>
                                     <button type="submit">수정</button>
                                 </form>
 
+                                <!-- 삭제 -->
                                 <form method="POST" action="{% url 'comment_delete' reply.pk %}">
                                     {% csrf_token %}
-                                    <button type="submit">삭제</button>
+                                    <button type="submit" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
                                 </form>
                             {% endif %}
                             <form method="POST" action="{% url 'comment_like' reply.pk %}">
