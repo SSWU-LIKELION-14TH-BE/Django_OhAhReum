@@ -160,7 +160,7 @@
 
     <hr>
 
-    <a href="{% url 'article_list' %}">목록</a>
+    <a href="{% url 'article_list' %}?{{ request.GET.urlencode }}">목록</a>
 
 </body>
 </html>
