@@ -4,10 +4,53 @@ from .forms import ArticleForm
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib import messages
+from django.db.models import Q
 
 def article_list(request):
+    query = request.GET.get('q')
+    search_type = request.GET.get('type')
+    tech_ids = request.GET.getlist('tech')
+
     articles = Article.objects.all().order_by('-created_at')
-    return render(request, 'list.html', {'articles': articles})
+
+    # 검색
+    if query:
+        if search_type == 'all':
+            articles = articles.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(comments__content__icontains=query) |
+                Q(author__nickname__icontains=query)
+            )
+
+        elif search_type == 'content':
+            articles = articles.filter(content__icontains=query)
+
+        elif search_type == 'comment':
+            articles = articles.filter(comments__content__icontains=query)
+
+        elif search_type == 'author':
+            articles = articles.filter(author__nickname__icontains=query)
+
+        else:  # title
+            articles = articles.filter(title__icontains=query)
+
+    # 기술 스택 필터
+    if tech_ids:
+        articles = articles.filter(tech_stacks__id__in=tech_ids)
+    articles = articles.distinct()
+
+    # 템플릿에 전달
+    from .models import TechStack
+    techs = TechStack.objects.all()
+
+    return render(request, 'list.html', {
+        'articles': articles,
+        'query': query,
+        'search_type': search_type,
+        'selected_techs': list(map(int, tech_ids)),
+        'techs': techs,
+    })
 
 
 def article_detail(request, pk):
