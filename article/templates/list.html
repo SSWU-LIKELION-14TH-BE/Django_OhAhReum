@@ -1,6 +1,34 @@
 <a href="{% url 'home' %}">홈으로</a>
 <h1>게시판</h1>
 
+<!-- 검색 -->
+<form method="GET">
+    <input type="text" name="q" value="{{ query }}" placeholder="검색어 입력">
+
+    <select name="type">
+        <option value="title" {% if search_type == 'title' %}selected{% endif %}>제목</option>
+        <option value="content" {% if search_type == 'content' %}selected{% endif %}>내용</option>
+        <option value="comment" {% if search_type == 'comment' %}selected{% endif %}>댓글</option>
+        <option value="author" {% if search_type == 'author' %}selected{% endif %}>작성자</option>
+        <option value="all" {% if search_type == 'all' %}selected{% endif %}>전체</option>
+    </select>
+
+    <button type="submit">검색</button>
+
+    <!-- 기술 스택 -->
+    <div>
+        {% for tech in techs %}
+            <label>
+                <input type="checkbox" name="tech" value="{{ tech.id }}"
+                {% if tech.id in selected_techs %}checked{% endif %}>
+                {{ tech.name }}
+            </label>
+        {% endfor %}
+    </div>
+</form>
+
+<hr>
+
 <a href="{% url 'article_create' %}">글쓰기</a>
 
 <ul>
@@ -9,7 +37,9 @@
       <a href="{% url 'article_detail' article.pk %}">
         {{ article.title }}
       </a>
-      - {{ article.author }}
+      - {{ article.author.nickname }}
     </li>
+  {% empty %}
+    <li>검색 결과가 없습니다.</li>
   {% endfor %}
 </ul>
