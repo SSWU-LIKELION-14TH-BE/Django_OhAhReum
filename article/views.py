@@ -4,14 +4,15 @@ from .forms import ArticleForm
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count
 
 def article_list(request):
     query = request.GET.get('q')
     search_type = request.GET.get('type')
     tech_ids = request.GET.getlist('tech')
+    sort = request.GET.get('sort', 'latest')
 
-    articles = Article.objects.all().order_by('-created_at')
+    articles = Article.objects.all()
 
     # 검색
     if query:
@@ -40,6 +41,14 @@ def article_list(request):
         articles = articles.filter(tech_stacks__id__in=tech_ids)
     articles = articles.distinct()
 
+    # 좋아요 수 계산
+    articles = articles.annotate(like_count=Count('like_users'))
+    # 정렬
+    if sort == 'popular':
+        articles = articles.order_by('-like_count', '-created_at')
+    else:
+        articles = articles.order_by('-created_at')
+
     # 템플릿에 전달
     from .models import TechStack
     techs = TechStack.objects.all()
@@ -50,6 +59,7 @@ def article_list(request):
         'search_type': search_type,
         'selected_techs': list(map(int, tech_ids)),
         'techs': techs,
+        'sort': sort,
     })
 
 

@@ -1,9 +1,21 @@
-<a href="{% url 'home' %}">홈으로</a>
-<h1>게시판</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>게시판</title>
+</head>
+<body>
+  {% with request.GET.urlencode as querystring %}
+  <a href="{% url 'home' %}">홈으로</a>
+  <h1>게시판</h1>
 
 <!-- 검색 -->
-<form method="GET">
-    <input type="text" name="q" value="{{ query }}" placeholder="검색어 입력">
+  <form method="GET">
+    <select name="sort">
+      <option value="latest" {% if sort == 'latest' %}selected{% endif %}>최신순</option>
+      <option value="popular" {% if sort == 'popular' %}selected{% endif %}>인기순</option>
+    </select>
+
+    <input type="text" name="q" value="{{ query|default:'' }}" placeholder="검색어 입력">
 
     <select name="type">
         <option value="title" {% if search_type == 'title' %}selected{% endif %}>제목</option>
@@ -25,21 +37,24 @@
             </label>
         {% endfor %}
     </div>
-</form>
+  </form>
 
-<hr>
+  <hr>
 
-<a href="{% url 'article_create' %}">글쓰기</a>
+  <a href="{% url 'article_create' %}">글쓰기</a>
 
-<ul>
-  {% for article in articles %}
-    <li>
-      <a href="{% url 'article_detail' article.pk %}">
-        {{ article.title }}
-      </a>
-      - {{ article.author.nickname }}
-    </li>
-  {% empty %}
-    <li>검색 결과가 없습니다.</li>
-  {% endfor %}
-</ul>
+  <ul>
+    {% for article in articles %}
+      <li>
+        <a href="{% url 'article_detail' article.pk %}?{{ querystring }}">
+          {{ article.title }}
+        </a>
+        - {{ article.author.nickname }}
+      </li>
+    {% empty %}
+      <li>검색 결과가 없습니다.</li>
+    {% endfor %}
+  </ul>
+  {% endwith %}
+</body>
+</html>
