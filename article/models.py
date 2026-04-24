@@ -13,6 +13,8 @@ class Article(models.Model):
 
     like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_articles', blank=True)
 
+    views = models.PositiveIntegerField(default=0)
+
     def __str__(self):
         return self.title
     
