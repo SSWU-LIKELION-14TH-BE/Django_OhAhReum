@@ -4,7 +4,7 @@ from .forms import ArticleForm
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib import messages
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F
 
 def article_list(request):
     query = request.GET.get('q')
@@ -65,7 +65,18 @@ def article_list(request):
 
 def article_detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
-    return render(request, 'detail.html', {'article': article})
+
+    cookie_name = f'viewed_{pk}'
+
+    if not request.COOKIES.get(cookie_name):
+        Article.objects.filter(pk=pk).update(views=F('views') + 1)
+
+    response = render(request, 'detail.html', {'article': article})
+
+    # 쿠키 설정 (1시간 재조회 방지)
+    response.set_cookie(cookie_name, 'true', max_age=60*60)
+
+    return response
 
 @transaction.atomic  # 트랜잭션 시작
 @login_required
