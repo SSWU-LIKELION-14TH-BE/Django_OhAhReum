@@ -72,7 +72,7 @@
     <!-- 댓글 목록 -->
     {% for comment in article.comments.all %}
         {% if not comment.parent %}
-            <div style="border:1px solid #ccc; margin:10px; padding:10px;">
+            <div id="comment-{{ comment.id }}" style="border:1px solid #ccc; margin:10px; padding:10px;">
 
                 <!-- 작성자 + 시간 -->
                 <strong>{{ comment.author.nickname }}</strong>
@@ -110,7 +110,7 @@
                 <!-- 대댓글 목록 -->
                 <div style="margin-left:20px;">
                     {% for reply in comment.replies.all %}
-                        <div style="border:1px solid #eee; margin:5px; padding:5px;">
+                        <div id="comment-{{ reply.id }}" style="border:1px solid #eee; margin:5px; padding:5px;">
                             <strong>{{ reply.author.nickname }}</strong>
                             <small>{{ reply.created_at }}</small>
                             <p>{{ reply.content|linebreaksbr }}</p>

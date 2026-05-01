@@ -7,6 +7,13 @@ from .forms import LoginForm
 from django.contrib.auth import logout
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileUpdateForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+from article.models import Article
+from comment.models import Comment
 
 def signup_view(request):
     if request.method == 'POST':
@@ -62,3 +69,47 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'password_reset_complete.html'
+
+@login_required
+def mypage_view(request):
+    user = request.user
+
+    my_articles = Article.objects.filter(author=user).order_by('-created_at')
+
+    # 내 댓글
+    my_comments = Comment.objects.filter(author=user).select_related('article').order_by('-created_at')
+
+    return render(request, 'mypage.html', {
+        'user': user,
+        'my_articles': my_articles,
+        'my_comments': my_comments,
+    })
+
+
+@login_required
+def profile_update_view(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+
+            # 비밀번호 변경 처리
+            password = form.cleaned_data.get('password1')
+            if password:
+                user.set_password(password)
+
+            user.save()
+
+            messages.success(request, "회원정보가 수정되었습니다.")
+
+            # 비밀번호 바뀌면 재로그인 필요
+            if password:
+                return redirect('login')
+
+            return redirect('home')
+
+    else:
+        form = ProfileUpdateForm(instance=request.user)
+
+    return render(request, 'profile_update.html', {'form': form})
