@@ -15,3 +15,29 @@ class LoginForm(AuthenticationForm):
 class LogoutForm(forms.Form):
     pass
 
+class ProfileUpdateForm(forms.ModelForm):
+    password1 = forms.CharField(
+        widget=forms.PasswordInput,
+        required=False,
+        label="새 비밀번호"
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput,
+        required=False,
+        label="새 비밀번호 확인"
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'nickname']
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get('password1')
+        p2 = cleaned.get('password2')
+
+        if p1 or p2:
+            if p1 != p2:
+                raise forms.ValidationError("비밀번호가 일치하지 않습니다.")
+
+        return cleaned

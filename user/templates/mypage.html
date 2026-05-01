@@ -1,0 +1,60 @@
+<h1>마이페이지</h1>
+
+<p>아이디: {{ user.username }}</p>
+<p>닉네임: {{ user.nickname }}</p>
+
+<a href="{% url 'profile_update' %}">회원정보 수정</a>
+
+<hr>
+
+<h2>내 게시물</h2>
+
+<ul>
+{% for article in my_articles %}
+    <li>
+        <a href="{% url 'article_detail' article.pk %}">
+            {{ article.title }}
+        </a>
+
+        <!-- 수정/삭제 -->
+        <a href="{% url 'article_update' article.pk %}">수정</a>
+
+        <form method="POST" action="{% url 'article_delete' article.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">삭제</button>
+        </form>
+    </li>
+{% empty %}
+    <li>작성한 게시물이 없습니다.</li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h2>내 댓글</h2>
+
+<ul>
+{% for comment in my_comments %}
+    <li>
+        <!-- 어떤 게시글의 댓글인지 -->
+        <a href="{% url 'article_detail' comment.article.pk %}">
+            [{{ comment.article.title }}]
+        </a>
+
+        <br>
+
+        <!-- 댓글 내용 -->
+         <a href="{% url 'article_detail' comment.article.pk %}#comment-{{ comment.id }}">
+            {{ comment.content|truncatechars:20 }}
+        </a>
+
+        <br>
+
+        <small>{{ comment.created_at }}</small>
+    </li>
+{% empty %}
+    <li>작성한 댓글이 없습니다.</li>
+{% endfor %}
+</ul>
+
+<a href="{% url 'home' %}">홈으로</a>
