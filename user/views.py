@@ -2,18 +2,17 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 
 from user.models import CustomUser
-from .forms import SignUpForm
-from .forms import LoginForm
+from .forms import SignUpForm, LoginForm, GuestbookForm, ProfileUpdateForm
 from django.contrib.auth import logout
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
-from .forms import ProfileUpdateForm
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from article.models import Article
 from comment.models import Comment
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+from django.contrib.auth import update_session_auth_hash
 
 def signup_view(request):
     if request.method == 'POST':
@@ -71,20 +70,45 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'password_reset_complete.html'
 
 @login_required
-def mypage_view(request):
-    user = request.user
+def mypage_view(request, user_id=None):
+    target_user = get_object_or_404(CustomUser, id=user_id)
+    is_owner = (request.user == target_user)
 
-    my_articles = Article.objects.filter(author=user).order_by('-created_at')
 
-    # 내 댓글
-    my_comments = Comment.objects.filter(author=user).select_related('article').order_by('-created_at')
+    # 글 / 댓글 공개 설정
+    articles = (
+        Article.objects.filter(author=target_user)
+        if target_user.show_articles or is_owner
+        else Article.objects.none()
+    )
+
+    comments = (
+        Comment.objects.filter(author=target_user)
+        if target_user.show_comments or is_owner
+        else Comment.objects.none()
+    )
+
+    # 방명록 필터링
+    if request.user.is_authenticated:
+        guestbooks = target_user.guestbooks.filter(
+            Q(is_private=False) |
+            Q(author=request.user) |
+            Q(owner=request.user)
+        ).order_by('-created_at')
+    else:
+        guestbooks = target_user.guestbooks.filter(is_private=False)
+
+    form = GuestbookForm()
+    
 
     return render(request, 'mypage.html', {
-        'user': user,
-        'my_articles': my_articles,
-        'my_comments': my_comments,
+        'target_user': target_user,
+        'is_owner': is_owner,
+        'articles': articles,
+        'comments': comments,
+        'guestbooks': guestbooks,
+        'form': form,
     })
-
 
 @login_required
 def profile_update_view(request):
@@ -94,22 +118,35 @@ def profile_update_view(request):
         if form.is_valid():
             user = form.save(commit=False)
 
-            # 비밀번호 변경 처리
             password = form.cleaned_data.get('password1')
+
             if password:
                 user.set_password(password)
 
             user.save()
 
-            messages.success(request, "회원정보가 수정되었습니다.")
-
-            # 비밀번호 바뀌면 재로그인 필요
+            # 비밀번호 변경 시 로그인 유지
             if password:
-                return redirect('login')
-
-            return redirect('home')
+                update_session_auth_hash(request, user)
+            messages.success(request, "회원정보가 수정되었습니다.")
+            return redirect('mypage', user_id=request.user.id)
 
     else:
         form = ProfileUpdateForm(instance=request.user)
 
     return render(request, 'profile_update.html', {'form': form})
+
+@login_required
+def guestbook_create_view(request, user_id):
+    owner = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == 'POST':
+        form = GuestbookForm(request.POST)
+
+        if form.is_valid():
+            guestbook = form.save(commit=False)
+            guestbook.author = request.user
+            guestbook.owner = owner
+            guestbook.save()
+
+    return redirect('mypage', user_id=user_id)

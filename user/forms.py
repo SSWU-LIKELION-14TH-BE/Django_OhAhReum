@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import CustomUser
+from .models import CustomUser, Guestbook
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True) #email필수
@@ -29,7 +29,13 @@ class ProfileUpdateForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'nickname']
+        fields = [
+            'username',
+            'email',
+            'nickname',
+            'show_articles',
+            'show_comments',
+        ]
 
     def clean(self):
         cleaned = super().clean()
@@ -41,3 +47,24 @@ class ProfileUpdateForm(forms.ModelForm):
                 raise forms.ValidationError("비밀번호가 일치하지 않습니다.")
 
         return cleaned
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        password = self.cleaned_data.get('password1')
+
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+
+        return user
+    
+class GuestbookForm(forms.ModelForm):
+    class Meta:
+        model = Guestbook
+        fields = ['content', 'is_private']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 3})
+        }
