@@ -1,60 +1,145 @@
-<h1>마이페이지</h1>
+{% if messages %}
+    {% for message in messages %}
+        <p style="color:green;">{{ message }}</p>
+    {% endfor %}
+{% endif %}
 
-<p>아이디: {{ user.username }}</p>
-<p>닉네임: {{ user.nickname }}</p>
+<h1>{{ target_user.nickname }}의 마이페이지</h1>
 
-<a href="{% url 'profile_update' %}">회원정보 수정</a>
+{% if is_owner %}
+    <a href="{% url 'profile_update' %}">회원정보 수정</a>
+{% endif %}
 
 <hr>
 
+{% if articles %}
 <h2>내 게시물</h2>
 
 <ul>
-{% for article in my_articles %}
+{% for article in articles|slice:":5" %}
     <li>
         <a href="{% url 'article_detail' article.pk %}">
             {{ article.title }}
         </a>
 
-        <!-- 수정/삭제 -->
-        <a href="{% url 'article_update' article.pk %}">수정</a>
+        {% if is_owner %}
+            <a href="{% url 'article_update' article.pk %}">수정</a>
 
-        <form method="POST" action="{% url 'article_delete' article.pk %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit">삭제</button>
-        </form>
+            <form method="POST" action="{% url 'article_delete' article.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">삭제</button>
+            </form>
+        {% endif %}
     </li>
-{% empty %}
-    <li>작성한 게시물이 없습니다.</li>
 {% endfor %}
 </ul>
+
+{% if articles|length > 5 %}
+    <button onclick="toggleArticles()">더보기</button>
+
+    <ul id="more-articles" style="display:none;">
+    {% for article in articles|slice:"5:" %}
+        <li>
+            <a href="{% url 'article_detail' article.pk %}">
+                {{ article.title }}
+            </a>
+
+            {% if is_owner %}
+                <a href="{% url 'article_update' article.pk %}">수정</a>
+
+                <form method="POST" action="{% url 'article_delete' article.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">삭제</button>
+                </form>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endif %}
+
 
 <hr>
 
+{% if comments %}
 <h2>내 댓글</h2>
 
 <ul>
-{% for comment in my_comments %}
+{% for comment in comments|slice:":5" %}
     <li>
-        <!-- 어떤 게시글의 댓글인지 -->
         <a href="{% url 'article_detail' comment.article.pk %}">
             [{{ comment.article.title }}]
-        </a>
+        </a><br>
 
-        <br>
-
-        <!-- 댓글 내용 -->
-         <a href="{% url 'article_detail' comment.article.pk %}#comment-{{ comment.id }}">
+        <a href="{% url 'article_detail' comment.article.pk %}#comment-{{ comment.id }}">
             {{ comment.content|truncatechars:20 }}
-        </a>
-
-        <br>
+        </a><br>
 
         <small>{{ comment.created_at }}</small>
     </li>
-{% empty %}
-    <li>작성한 댓글이 없습니다.</li>
 {% endfor %}
 </ul>
 
+{% if comments|length > 5 %}
+    <button onclick="toggleComments()">더보기</button>
+
+    <ul id="more-comments" style="display:none;">
+    {% for comment in comments|slice:"5:" %}
+        <li>
+            <a href="{% url 'article_detail' comment.article.pk %}">
+                [{{ comment.article.title }}]
+            </a><br>
+
+            <a href="{% url 'article_detail' comment.article.pk %}#comment-{{ comment.id }}">
+                {{ comment.content|truncatechars:20 }}
+            </a><br>
+
+            <small>{{ comment.created_at }}</small>
+        </li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
+{% endif %}
+
+<!-- 방명록 -->
+<h3>방명록</h3>
+
+{% if user.is_authenticated %}
+<form method="POST" action="{% url 'guestbook_create' target_user.id %}">
+    {% csrf_token %}
+    {{ form.content }}
+    <label>{{ form.is_private }} 비공개</label>
+    <button type="submit">작성</button>
+</form>
+{% endif %}
+
+<hr>
+
+{% for gb in guestbooks %}
+    <div style="border:1px solid #ccc; margin:10px; padding:10px;">
+        <strong>{{ gb.author.nickname }}</strong>
+        <small>{{ gb.created_at }}</small>
+
+        {% if gb.is_private %}
+            🔒 비공개
+        {% endif %}
+
+        <p>{{ gb.content|linebreaksbr }}</p>
+    </div>
+{% endfor %}
+
 <a href="{% url 'home' %}">홈으로</a>
+
+
+<script>
+function toggleArticles() {
+    const el = document.getElementById('more-articles');
+    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+
+function toggleComments() {
+    const el = document.getElementById('more-comments');
+    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+</script>

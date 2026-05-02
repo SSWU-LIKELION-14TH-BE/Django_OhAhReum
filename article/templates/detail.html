@@ -18,7 +18,9 @@
         {% csrf_token %}
         <button type="submit">삭제</button>
     </form>
-    <p>{{ article.author.nickname }}</p>
+    <a href="{% url 'mypage' article.author.id %}">
+        {{ article.author.nickname }}
+    </a>
     <p>조회수: {{ article.views }}</p>
     <hr>
     <p>{{ article.content|linebreaksbr }}</p>
@@ -75,7 +77,11 @@
             <div id="comment-{{ comment.id }}" style="border:1px solid #ccc; margin:10px; padding:10px;">
 
                 <!-- 작성자 + 시간 -->
-                <strong>{{ comment.author.nickname }}</strong>
+                <strong>
+                    <a href="{% url 'mypage' comment.author.id %}">
+                        {{ comment.author.nickname }}
+                    </a>
+                </strong>
                 <small>{{ comment.created_at }}</small>
 
                 <p>{{ comment.content|linebreaksbr }}</p>
@@ -111,7 +117,11 @@
                 <div style="margin-left:20px;">
                     {% for reply in comment.replies.all %}
                         <div id="comment-{{ reply.id }}" style="border:1px solid #eee; margin:5px; padding:5px;">
-                            <strong>{{ reply.author.nickname }}</strong>
+                            <strong>
+                                <a href="{% url 'mypage' reply.author.id %}">
+                                    {{ reply.author.nickname }}
+                                </a>
+                            </strong>
                             <small>{{ reply.created_at }}</small>
                             <p>{{ reply.content|linebreaksbr }}</p>
                             {% if request.user == reply.author %}

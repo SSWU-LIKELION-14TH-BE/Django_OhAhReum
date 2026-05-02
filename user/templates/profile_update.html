@@ -18,14 +18,10 @@
     
     {{ form.as_p }}
 
-    <p>비밀번호 변경 (선택)</p>
-    {{ form.password1 }}
-    {{ form.password2 }}
-
     <button type="submit">수정</button>
 </form>
 
-<a href="{% url 'mypage' %}">마이페이지로</a>
+<a href="{% url 'mypage' user.id %}">마이페이지로</a>
 <a href="{% url 'home' %}">홈으로</a>
 </body>
 </html>

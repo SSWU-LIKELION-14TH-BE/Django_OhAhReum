@@ -8,9 +8,9 @@
     <h2>홈페이지</h2>
     {% if user.is_authenticated %}
         <p>{{ user.nickname }}님 환영합니다!</p>
-         <p>
-        <a href="{% url 'article_list' %}">게시판</a>
-        <a href="{% url 'mypage' %}">마이페이지</a>
+        <p>
+            <a href="{% url 'article_list' %}">게시판</a>
+            <a href="{% url 'mypage' user.id %}">마이페이지</a>
         </p>
 
         <form method="post" action="{% url 'logout' %}">
