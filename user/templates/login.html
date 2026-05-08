@@ -11,6 +11,11 @@
             {{ form.as_p }}
             <button type="submit">로그인 하기</button>
         </form>
+        {% load socialaccount %}
+        <a href="{% provider_login_url 'naver' %}">
+            네이버 로그인
+        </a>
+        <hr>
         <a href="{% url 'password_reset' %}">비밀번호를 잊으셨나요?</a>
     </body>
 </html>

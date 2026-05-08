@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('user.urls')), #users 앱의 url 연결
+    path('accounts/', include('allauth.urls')),
     path('article/', include('article.urls')), #article 앱의 url 연결
     path('comment/', include('comment.urls')), #comment 앱의 url 연결
 ]
