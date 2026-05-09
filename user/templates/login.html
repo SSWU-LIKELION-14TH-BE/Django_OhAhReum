@@ -15,7 +15,13 @@
         <a href="{% provider_login_url 'naver' %}">
             네이버 로그인
         </a>
+        <br>
+        <a href="{% provider_login_url 'kakao' %}">
+            카카오 로그인
+        </a>
         <hr>
         <a href="{% url 'password_reset' %}">비밀번호를 잊으셨나요?</a>
+        <br>
+        <a href="{% url 'signup' %}">아직 회원이 아니신가요?</a>
     </body>
 </html>
